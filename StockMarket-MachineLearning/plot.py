@@ -46,9 +46,8 @@ def plot(model, company, days_back):
     x_test = []
 
     for x in range(days_back, len(model_inputs)):
-        x_test.append(model_inputs[x-days_back:x, 0])
+        x_test.append(model_inputs[:x, 0])
 
-    print(x_test)
     x_test = np.array(x_test)
     x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], 1))
 

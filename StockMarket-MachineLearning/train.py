@@ -35,7 +35,8 @@ def main():
             compare_prediction_to_real(model, company)
         else:
             exit(0)
-    
+    else:
+        train(args.company, args.days, args.batch_size, args.epochs)
 
 
 def train(company, prediction_base, batch_size, epochs):
