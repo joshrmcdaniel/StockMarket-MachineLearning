@@ -8,7 +8,7 @@
 <body>
     <h1>Models</h1>
     {% for model in models %}
-        {{ model }}<br>
+        <a href='/download/{{ model }}'>{{ model }}</a><br>
     {% endfor %}
 </body>
 </html>
