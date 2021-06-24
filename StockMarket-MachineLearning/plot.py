@@ -6,6 +6,7 @@ import pandas_datareader as web
 import datetime as dt
 import os
 
+
 from sklearn.preprocessing import MinMaxScaler
 from tensorflow.keras.models import Sequential, load_model
 from tensorflow.keras.layers import Dense, Dropout, LSTM
@@ -13,32 +14,33 @@ from tensorflow.keras.layers import Dense, Dropout, LSTM
 
 def main():
     args = argparse.ArgumentParser()
-    args.add_argument('-d', '--days-back', type=int, required=True)
-    args.add_argument('-m', '--model', help='Path to model', type=str, required=True)
+    args.add_argument('-d', '--days-back', type=int, default=90)
+    args.add_argument('-m', '--model', help='Model to use', type=str, required=True)
     
     args = args.parse_args()
 
+    graph = plot_predictions(args.model, args.days_back)
+    graph.legend()
+    graph.show()
+
+
+def plot_predictions(company, days_back):
     try:
-        model = load_model(args.model)
+        model = load_model(f'models/{company}.model')
     except OSError:
         raise FileNotFoundError('Cannot find model')
-
-    if os.path.sep in args.model:
-        company = args.model[args.model.rindex(os.path.sep)+1:args.model.rindex('.')]
-    else:
-        company = args.model[:args.model.rindex('.')]
-
-    plot(model, company, args.days_back)
-
-def plot(model, company, days_back):
-    start = dt.datetime.now() - dt.timedelta(days_back)
-    end = dt.datetime.now()
+    start = dt.datetime(2012, 1, 1)
+    end = dt.datetime(2021, 1, 1) 
     data = web.DataReader(company, 'yahoo', start, end)
-    actual_prices = data['Close'].values
+    test_start = dt.datetime(2020, 1, 1)
+    test_end = dt.datetime.now()
+    test_data = web.DataReader(company, 'yahoo', test_start, test_end)
+    actual_prices = test_data['Close'].values
 
+    total_dataset = pd.concat((data['Close'], test_data['Close']))
     scaler = MinMaxScaler(feature_range=(0, 1))
     scaler.fit_transform(data['Close'].values.reshape(-1, 1))
-    model_inputs = data.values
+    model_inputs = total_dataset[len(total_dataset) - len(test_data) - days_back:].values
     model_inputs = model_inputs.reshape(-1, 1)
 
     model_inputs = scaler.transform(model_inputs)
@@ -46,7 +48,7 @@ def plot(model, company, days_back):
     x_test = []
 
     for x in range(days_back, len(model_inputs)):
-        x_test.append(model_inputs[:x, 0])
+        x_test.append(model_inputs[x-days_back:x, 0])
 
     x_test = np.array(x_test)
     x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], 1))
@@ -59,8 +61,7 @@ def plot(model, company, days_back):
     plt.title(f'{company} Share Price')
     plt.xlabel('Time')
     plt.ylabel(f'{company} Share Price')
-    plt.legend()
-    plt.show()
+    return plt
 
 
 if __name__ == '__main__':
