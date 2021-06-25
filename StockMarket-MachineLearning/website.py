@@ -9,22 +9,23 @@ from flask_restful import reqparse
 from plot import plot_predictions
 from train import train_model
 
+
 app = Flask(__name__)
 
 
 @app.route('/train/<string:company>')
 def train_model(company):
-    reqparse = reqparse.RequestParser()
-    reqparse.add_argument('prediction_base', type=int, default=90)
-    reqparse.add_argument('epochs', type=int, default=25)
-    reqparse.add_argument('batch', type=int, default=64)
+    req_parse = reqparse.RequestParser()
+    req_parse.add_argument('prediction_base', type=int, default=90)
+    req_parse.add_argument('epochs', type=int, default=25)
+    req_parse.add_argument('batch', type=int, default=64)
 
 
 @app.route('/download/<string:model>')
 def download(model):
     mem = BytesIO()
     zip = zipfile.ZipFile(mem, 'w', zipfile.ZIP_DEFLATED)
-    for cur, _dirs, files in os.walk(f'models/{model}.model'):
+    for cur, _, files in os.walk(f'models/{model}.model'):
         for f in files:
             path_to_model = os.path.join(cur, f)
             zip_path = path_to_model[path_to_model.index(os.path.sep)+1:]
