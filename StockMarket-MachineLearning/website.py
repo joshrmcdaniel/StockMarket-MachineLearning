@@ -24,13 +24,11 @@ def train_model(company):
 def download(model):
     mem = BytesIO()
     zip = zipfile.ZipFile(mem, 'w', zipfile.ZIP_DEFLATED)
-    for cur, _dirs, files in os.walk(os.path.relpath('models')):
-        head, tail = os.path.split(cur)
-        while head:
-            head, _tail = os.path.split(head)
+    for cur, _dirs, files in os.walk(f'models/{model}.model'):
         for f in files:
             path_to_model = os.path.join(cur, f)
-            zip.writestr(path_to_model, open(path_to_model, 'rb').read())
+            zip_path = path_to_model[path_to_model.index(os.path.sep)+1:]
+            zip.writestr(zip_path, open(path_to_model, 'rb').read())
     zip.close()
     mem.seek(0)
     return send_file(mem, mimetype='application/zip', as_attachment=True, attachment_filename=f'{model.upper()}.model.zip')
