@@ -3,3 +3,5 @@ keras
 matplotlib
 scikit-learn
 pyqt5
+flask
+flask-restful
