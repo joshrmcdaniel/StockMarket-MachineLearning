@@ -4,7 +4,7 @@ import base64
 import zipfile
 
 from io import BytesIO
-from flask import Flask, render_template, send_file
+from flask import Flask, render_template, send_file, redirect
 from flask_restful import reqparse
 from plot import plot_predictions
 from train import train_model
@@ -13,12 +13,18 @@ from train import train_model
 app = Flask(__name__)
 
 
-@app.route('/train/<string:company>')
-def train_model(company):
+@app.route('/train/')
+def train():
     req_parse = reqparse.RequestParser()
+    req_parse.add_argument('company', type=str, required=True)
     req_parse.add_argument('prediction_base', type=int, default=90)
     req_parse.add_argument('epochs', type=int, default=25)
-    req_parse.add_argument('batch', type=int, default=64)
+    req_parse.add_argument('batch_size', type=int, default=64)
+
+    args = req_parse.parse_args()
+
+    train_model(args.company, args.prediction_base, args.batch_size, args.epochs)
+    return redirect(f'/plot/{args.company}')
 
 
 @app.route('/download/<string:model>')
@@ -55,6 +61,7 @@ def plot(model):
     graph.savefig(buf, format="png")
     data = base64.b64encode(buf.getbuffer()).decode("ascii")
     return render_template('plot.html', company=model, data=data)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

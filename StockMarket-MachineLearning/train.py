@@ -29,17 +29,17 @@ def main():
 
     if os.path.exists(f'models/{args.company}.model'):
         if input(f'File {args.company}.model already exists, overwrite? ').lower() == 'y':
-            train(args.company, args.days, args.batch_size, args.epochs)
+            train_model(args.company, args.days, args.batch_size, args.epochs)
         elif input(f'Compare prediction of {args.company} to actual data? ').lower() == 'y':
             model = load(args.company)
             compare_prediction_to_real(model, company)
         else:
             exit(0)
     else:
-        train(args.company, args.days, args.batch_size, args.epochs)
+        train_model(args.company, args.days, args.batch_size, args.epochs)
 
 
-def train(company, prediction_base, batch_size, epochs):
+def train_model(company, prediction_base, batch_size, epochs):
    
     data = web.DataReader(company, 'yahoo', start, end)
 
@@ -77,7 +77,6 @@ def train(company, prediction_base, batch_size, epochs):
         compare_prediction_to_real(model, company)
     else:
         exit(0)
-
 
 
 def compare_prediction_to_real(model, company):
