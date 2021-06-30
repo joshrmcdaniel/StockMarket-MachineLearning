@@ -32,11 +32,15 @@ def main():
             train_model(args.company, args.days, args.batch_size, args.epochs)
         elif input(f'Compare prediction of {args.company} to actual data? ').lower() == 'y':
             model = load(args.company)
-            compare_prediction_to_real(model, company)
+            compare_prediction_to_real(model, args.company)
         else:
             exit(0)
     else:
-        train_model(args.company, args.days, args.batch_size, args.epochs)
+        model = train_model(args.company, args.days, args.batch_size, args.epochs)
+        if input('Compare predicted prices to real prices? ').lower == 'y':
+            compare_prediction_to_real(model, args.company)
+        else:
+            exit(0)
 
 
 def train_model(company, prediction_base, batch_size, epochs):
@@ -73,10 +77,7 @@ def train_model(company, prediction_base, batch_size, epochs):
         os.mkdir('models')
     model.save(f'models/{company}.model', overwrite=True)
     print('Model saved')
-    if input('Compare predicted prices to real prices? ').lower == 'y':
-        compare_prediction_to_real(model, company)
-    else:
-        exit(0)
+    return model
 
 
 def compare_prediction_to_real(model, company):
@@ -118,6 +119,7 @@ def compare_prediction_to_real(model, company):
 def load(company):
     model = load_model(f'models/{company}.model')
     return model
+
 
 if __name__ == '__main__':
     main()
