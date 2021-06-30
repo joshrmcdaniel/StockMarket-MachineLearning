@@ -1,6 +1,9 @@
 tensorflow
 keras
 matplotlib
+pandas
+numpy
+pandas-datareader
 scikit-learn
 pyqt5
 flask
