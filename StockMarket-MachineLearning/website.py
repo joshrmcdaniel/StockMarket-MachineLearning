@@ -4,7 +4,7 @@ import base64
 import zipfile
 
 from io import BytesIO
-from flask import Flask, render_template, send_file, redirect
+from flask import Flask, render_template, send_file, redirect, request
 from flask_restful import reqparse
 from plot import plot_predictions
 from train import train_model
@@ -41,13 +41,23 @@ def download(model):
     return send_file(mem, mimetype='application/zip', as_attachment=True, attachment_filename=f'{model.upper()}.model.zip')
 
 
+@app.route('/upload/')
+def upload():
+    return render_template('upload.html')
+
+
+@app.route('/uploader/', methods=['POST'])
+def uploader():
+    f = request['model']
+    zip = zipfile(f, 'r')
+    zip.extractall('models/')
+    return 'Uploaded'
 
 
 @app.route('/models/')
 def models():
     path = os.getcwd()
     models = [model[:model.rindex('.')] for model in os.listdir('models') if os.path.isdir(os.path.join(path, 'models', model))]
-    print(models)
     return render_template('models.html', header='Models', models=models)
 
 
